@@ -1,19 +1,13 @@
-import {
-  Animated,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Children, useEffect, useMemo } from 'react';
 import { SheetTabBar } from './SheetTabBar';
-import { SheetHandle } from './SheetHandle';
-import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
+import { SheetContent } from './SheetContent';
 import { SHEET_COLORS, SHEET_LAYOUT } from '../constants';
+import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
 import {
   clamp,
   isSheetScreen,
   mergeScreenOptions,
-  renderScreenContent,
   resolveNavigatorOptions,
   warnSheetScreenValidation,
 } from '../utils';
@@ -166,46 +160,26 @@ export function FloatingSheetNavigator({
               : null,
           ]}
         >
-          <Animated.View
-            pointerEvents={isExpanded ? 'auto' : 'none'}
-            style={[
-              styles.contentWrap,
-              activeOptions.contentStyle,
-              {
-                bottom: resolvedCollapsedHeight,
-                opacity: contentOpacity,
-                transform: [{ translateY: contentTranslateY }],
-              },
-            ]}
-          >
-            <SheetHandle color={activeOptions.handleColor} />
-
-            <Animated.View
-              key={activeScreen.props.name}
-              style={[
-                activeOptions.screenBackgroundColor
-                  ? { backgroundColor: activeOptions.screenBackgroundColor }
-                  : null,
-                styles.screen,
-                activeOptions.screenStyle,
-                {
-                  opacity: screenProgress,
-                  transform: [{ translateY: screenTranslateY }],
-                },
-              ]}
-            >
-              {renderScreenContent(activeScreen, helpers)}
-            </Animated.View>
-          </Animated.View>
+          <SheetContent
+            helpers={helpers}
+            isExpanded={isExpanded}
+            activeScreen={activeScreen}
+            activeOptions={activeOptions}
+            contentOpacity={contentOpacity}
+            screenProgress={screenProgress}
+            screenTranslateY={screenTranslateY}
+            contentTranslateY={contentTranslateY}
+            collapsedHeight={resolvedCollapsedHeight}
+          />
 
           <SheetTabBar
             screens={screens}
+            onTabPress={goTo}
+            screenOptions={screenOptions}
+            tabBarStyle={activeOptions.tabBarStyle}
             activeRouteName={activeScreen.props.name}
             collapsedHeight={resolvedCollapsedHeight}
-            screenOptions={screenOptions}
             tabBarBackgroundColor={activeOptions.tabBarBackgroundColor}
-            tabBarStyle={activeOptions.tabBarStyle}
-            onTabPress={goTo}
           />
         </View>
       </Animated.View>
@@ -230,18 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: SHEET_LAYOUT.borderRadius,
     borderColor: SHEET_COLORS.border,
     borderWidth: 1,
-    flex: 1,
-    overflow: 'hidden',
-  },
-  contentWrap: {
-    left: 0,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  screen: {
     flex: 1,
     overflow: 'hidden',
   },
