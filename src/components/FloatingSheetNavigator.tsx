@@ -1,26 +1,21 @@
 import { Animated, StyleSheet, View } from 'react-native';
-import {
-  Children,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { Children, useEffect, useMemo, useRef } from 'react';
+import { SheetTabBar } from './SheetTabBar';
+import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
+import { SHEET_ANIMATION, SHEET_COLORS, SHEET_LAYOUT } from '../constants';
 import {
   clamp,
-  getRouteForScreen,
   isSheetScreen,
   mergeScreenOptions,
   renderScreenContent,
   resolveNavigatorOptions,
-  warn,
   warnSheetScreenValidation,
 } from '../utils';
-import { SheetTabBar } from './SheetTabBar';
-import { useSheetAnimation, useSheetPanResponder } from '../hooks';
-import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
-import { SHEET_ANIMATION, SHEET_COLORS, SHEET_LAYOUT } from '../constants';
+import {
+  useSheetAnimation,
+  useSheetNavigation,
+  useSheetPanResponder,
+} from '../hooks';
 
 export function FloatingSheetNavigator({
   children,
@@ -38,17 +33,6 @@ export function FloatingSheetNavigator({
     [children]
   );
 
-  const firstRouteName = screens[0]?.props.name;
-
-  const screenNames = useMemo(
-    () => new Set(screens.map((screen) => screen.props.name)),
-    [screens]
-  );
-
-  const [activeRouteName, setActiveRouteName] = useState(
-    initialRouteName ?? firstRouteName
-  );
-
   const {
     isExpanded,
     expansionProgress,
@@ -59,6 +43,13 @@ export function FloatingSheetNavigator({
   } = useSheetAnimation({
     initiallyExpanded,
   });
+
+  const { activeRouteName, activeScreen, activeRoute, goTo } =
+    useSheetNavigation({
+      screens,
+      initialRouteName,
+      openSheet,
+    });
 
   const screenProgress = useRef(new Animated.Value(1)).current;
 
@@ -74,14 +65,6 @@ export function FloatingSheetNavigator({
     progressValueRef,
   });
 
-  const activeScreen =
-    screens.find((screen) => screen.props.name === activeRouteName) ??
-    screens[0];
-
-  const activeRoute = activeScreen
-    ? getRouteForScreen(activeScreen)
-    : { name: '', title: '' };
-
   const activeOptions = activeScreen
     ? mergeScreenOptions(
       resolveNavigatorOptions(screenOptions, activeRoute, true),
@@ -95,12 +78,6 @@ export function FloatingSheetNavigator({
       initialRouteName,
     });
   }, [screens, initialRouteName]);
-
-  useEffect(() => {
-    if (!activeScreen && firstRouteName) {
-      setActiveRouteName(firstRouteName);
-    }
-  }, [activeScreen, firstRouteName]);
 
   useEffect(() => {
     const listenerId = expansionProgress.addListener(({ value }) => {
@@ -127,21 +104,6 @@ export function FloatingSheetNavigator({
       useNativeDriver: true,
     }).start();
   }, [activeRouteName, onRouteChange, screenProgress]);
-
-  const goTo = useCallback(
-    (routeName: string) => {
-      if (!screenNames.has(routeName)) {
-        warn(
-          `goTo("${routeName}") was called, but no matching Sheet.Screen exists.`
-        );
-        return;
-      }
-
-      setActiveRouteName(routeName);
-      openSheet();
-    },
-    [openSheet, screenNames]
-  );
 
   const helpers: SheetRenderHelpers = {
     currentRouteName: activeScreen?.props.name ?? '',
