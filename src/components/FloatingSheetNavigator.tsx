@@ -1,8 +1,8 @@
 import { Animated, StyleSheet, View } from 'react-native';
-import { Children, useEffect, useMemo, useRef } from 'react';
+import { Children, useEffect, useMemo } from 'react';
 import { SheetTabBar } from './SheetTabBar';
 import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
-import { SHEET_ANIMATION, SHEET_COLORS, SHEET_LAYOUT } from '../constants';
+import { SHEET_COLORS, SHEET_LAYOUT } from '../constants';
 import {
   clamp,
   isSheetScreen,
@@ -12,6 +12,7 @@ import {
   warnSheetScreenValidation,
 } from '../utils';
 import {
+  useScreenTransition,
   useSheetAnimation,
   useSheetNavigation,
   useSheetPanResponder,
@@ -51,7 +52,10 @@ export function FloatingSheetNavigator({
       openSheet,
     });
 
-  const screenProgress = useRef(new Animated.Value(1)).current;
+  const { screenProgress, screenTranslateY } = useScreenTransition({
+    activeRouteName,
+    onRouteChange,
+  });
 
   const dragRange = Math.max(expandedHeight - collapsedHeight, 1);
 
@@ -89,22 +93,6 @@ export function FloatingSheetNavigator({
     };
   }, [expansionProgress, progressValueRef]);
 
-  useEffect(() => {
-    if (!activeRouteName) {
-      return;
-    }
-
-    onRouteChange?.(activeRouteName);
-
-    screenProgress.setValue(0);
-
-    Animated.timing(screenProgress, {
-      toValue: 1,
-      duration: SHEET_ANIMATION.screenTransitionDuration,
-      useNativeDriver: true,
-    }).start();
-  }, [activeRouteName, onRouteChange, screenProgress]);
-
   const helpers: SheetRenderHelpers = {
     currentRouteName: activeScreen?.props.name ?? '',
     goTo,
@@ -126,11 +114,6 @@ export function FloatingSheetNavigator({
   const contentTranslateY = expansionProgress.interpolate({
     inputRange: [0, 1],
     outputRange: [24, 0],
-  });
-
-  const screenTranslateY = screenProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [14, 0],
   });
 
   if (!activeScreen) {
