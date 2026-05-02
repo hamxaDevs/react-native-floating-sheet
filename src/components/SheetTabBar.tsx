@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: SHEET_COLORS.tabBarBackground,
         borderColor: SHEET_COLORS.tabBarBorder,
+        borderTopWidth: 1,
         bottom: 0,
         flexDirection: 'row',
         gap: 6,

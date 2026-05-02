@@ -114,7 +114,7 @@ export function FloatingSheetNavigator({
     [animateSheetToProgress]
   );
 
-  const minimizeSheet = useCallback(
+  const collapseSheet = useCallback(
     (initialVelocity = 0) => {
       animateSheetToProgress(0, initialVelocity);
     },
@@ -166,7 +166,7 @@ export function FloatingSheetNavigator({
           }
 
           if (gestureState.vy > SHEET_ANIMATION.velocityThreshold) {
-            minimizeSheet(Math.abs(gestureState.vy));
+            collapseSheet(Math.abs(gestureState.vy));
             return;
           }
 
@@ -174,7 +174,7 @@ export function FloatingSheetNavigator({
             if (currentProgress > SHEET_ANIMATION.keepExpandedThreshold) {
               openSheet();
             } else {
-              minimizeSheet();
+              collapseSheet();
             }
 
             return;
@@ -183,7 +183,7 @@ export function FloatingSheetNavigator({
           if (currentProgress > SHEET_ANIMATION.expandThresholdFromCollapsed) {
             openSheet();
           } else {
-            minimizeSheet();
+            collapseSheet();
           }
         },
 
@@ -191,11 +191,11 @@ export function FloatingSheetNavigator({
           if (progressValueRef.current > 0.5) {
             openSheet();
           } else {
-            minimizeSheet();
+            collapseSheet();
           }
         },
       }),
-    [dragRange, expansionProgress, isExpanded, minimizeSheet, openSheet]
+    [collapseSheet, dragRange, expansionProgress, isExpanded, openSheet]
   );
 
   useEffect(() => {
@@ -249,7 +249,6 @@ export function FloatingSheetNavigator({
     currentRouteName: activeScreen?.props.name ?? '',
     goTo,
     isExpanded,
-    minimize: minimizeSheet,
     open: openSheet,
     route: activeRoute,
   };
