@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { Children, useEffect, useMemo } from 'react';
 import { SheetTabBar } from './SheetTabBar';
+import { SheetHandle } from './SheetHandle';
 import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
 import { SHEET_COLORS, SHEET_LAYOUT } from '../constants';
 import {
@@ -177,16 +178,7 @@ export function FloatingSheetNavigator({
               },
             ]}
           >
-            <View style={styles.handleArea}>
-              <View
-                style={[
-                  styles.handle,
-                  activeOptions.handleColor
-                    ? { backgroundColor: activeOptions.handleColor }
-                    : null,
-                ]}
-              />
-            </View>
+            <SheetHandle color={activeOptions.handleColor} />
 
             <Animated.View
               key={activeScreen.props.name}
@@ -248,21 +240,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
-  },
-  handleArea: {
-    alignSelf: 'center',
-    alignItems: 'center',
-    height: SHEET_LAYOUT.handleAreaHeight,
-    justifyContent: 'center',
-    marginBottom: 6,
-    width: SHEET_LAYOUT.handleAreaWidth,
-  },
-  handle: {
-    backgroundColor: SHEET_COLORS.handle,
-    borderRadius: 999,
-    height: SHEET_LAYOUT.handleHeight,
-    opacity: 0.55,
-    width: SHEET_LAYOUT.handleWidth,
   },
   screen: {
     flex: 1,
