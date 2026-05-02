@@ -1,4 +1,9 @@
-import { Animated, StyleSheet, View } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Children, useEffect, useMemo } from 'react';
 import { SheetTabBar } from './SheetTabBar';
 import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
@@ -34,6 +39,29 @@ export function FloatingSheetNavigator({
     [children]
   );
 
+  const { height: windowHeight } = useWindowDimensions();
+
+  const resolvedCollapsedHeight = useMemo(
+    () =>
+      clamp(
+        collapsedHeight,
+        SHEET_LAYOUT.minCollapsedHeight,
+        SHEET_LAYOUT.maxCollapsedHeight
+      ),
+    [collapsedHeight]
+  );
+
+  const resolvedExpandedHeight = useMemo(() => {
+    const maxExpandedHeight = Math.floor(
+      windowHeight * SHEET_LAYOUT.maxExpandedHeightRatio
+    );
+
+    const minExpandedHeight =
+      resolvedCollapsedHeight + SHEET_LAYOUT.minExpandedHeightOffset;
+
+    return clamp(expandedHeight, minExpandedHeight, maxExpandedHeight);
+  }, [expandedHeight, resolvedCollapsedHeight, windowHeight]);
+
   const {
     isExpanded,
     expansionProgress,
@@ -57,7 +85,10 @@ export function FloatingSheetNavigator({
     onRouteChange,
   });
 
-  const dragRange = Math.max(expandedHeight - collapsedHeight, 1);
+  const dragRange = Math.max(
+    resolvedExpandedHeight - resolvedCollapsedHeight,
+    1
+  );
 
   const sheetPanResponder = useSheetPanResponder({
     collapseSheet,
@@ -103,7 +134,7 @@ export function FloatingSheetNavigator({
 
   const sheetHeight = expansionProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: [collapsedHeight, expandedHeight],
+    outputRange: [resolvedCollapsedHeight, resolvedExpandedHeight],
   });
 
   const contentOpacity = expansionProgress.interpolate({
@@ -140,7 +171,7 @@ export function FloatingSheetNavigator({
               styles.contentWrap,
               activeOptions.contentStyle,
               {
-                bottom: collapsedHeight,
+                bottom: resolvedCollapsedHeight,
                 opacity: contentOpacity,
                 transform: [{ translateY: contentTranslateY }],
               },
@@ -178,7 +209,7 @@ export function FloatingSheetNavigator({
           <SheetTabBar
             screens={screens}
             activeRouteName={activeScreen.props.name}
-            collapsedHeight={collapsedHeight}
+            collapsedHeight={resolvedCollapsedHeight}
             screenOptions={screenOptions}
             tabBarBackgroundColor={activeOptions.tabBarBackgroundColor}
             tabBarStyle={activeOptions.tabBarStyle}
