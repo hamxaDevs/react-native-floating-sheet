@@ -9,11 +9,13 @@ import {
 } from 'react';
 import {
   clamp,
-  isSheetScreen,
   getRouteForScreen,
+  isSheetScreen,
   mergeScreenOptions,
   renderScreenContent,
   resolveNavigatorOptions,
+  warn,
+  warnSheetScreenValidation,
 } from '../utils';
 import { SheetTabBar } from './SheetTabBar';
 import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
@@ -36,6 +38,11 @@ export function FloatingSheetNavigator({
   );
 
   const firstRouteName = screens[0]?.props.name;
+
+  const screenNames = useMemo(
+    () => new Set(screens.map((screen) => screen.props.name)),
+    [screens]
+  );
 
   const [activeRouteName, setActiveRouteName] = useState(
     initialRouteName ?? firstRouteName
@@ -67,6 +74,13 @@ export function FloatingSheetNavigator({
       activeScreen.props.options
     )
     : {};
+
+  useEffect(() => {
+    warnSheetScreenValidation({
+      screens,
+      initialRouteName,
+    });
+  }, [screens, initialRouteName]);
 
   const animateSheetToProgress = useCallback(
     (toProgress: number, initialVelocity = 0) => {
@@ -218,10 +232,17 @@ export function FloatingSheetNavigator({
 
   const goTo = useCallback(
     (routeName: string) => {
+      if (!screenNames.has(routeName)) {
+        warn(
+          `goTo("${routeName}") was called, but no matching Sheet.Screen exists.`
+        );
+        return;
+      }
+
       setActiveRouteName(routeName);
       openSheet();
     },
-    [openSheet]
+    [openSheet, screenNames]
   );
 
   const helpers: SheetRenderHelpers = {
