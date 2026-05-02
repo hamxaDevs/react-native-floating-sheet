@@ -123,7 +123,6 @@ export function FloatingSheetNavigator({
     currentRouteName: activeScreen?.props.name ?? '',
     goTo,
     isExpanded,
-    open: openSheet,
     route: activeRoute,
   };
 

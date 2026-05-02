@@ -19,7 +19,6 @@ export type SheetRenderHelpers = {
   currentRouteName: string;
   goTo: (routeName: string) => void;
   isExpanded: boolean;
-  open: () => void;
   route: SheetRoute;
 };
 
