@@ -34,4 +34,4 @@ MIT
 
 ---
 
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+Repository: [hamxaDevs/react-native-floating-sheet](https://github.com/hamxaDevs/react-native-floating-sheet)

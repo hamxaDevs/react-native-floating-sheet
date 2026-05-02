@@ -1,3 +1,4 @@
+import { Animated, PanResponder, StyleSheet, View } from 'react-native';
 import {
   Children,
   useCallback,
@@ -6,18 +7,17 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Animated, PanResponder, StyleSheet, View } from 'react-native';
-import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
-import { SHEET_ANIMATION } from '../constants/animation';
-import { SHEET_COLORS } from '../constants/colors';
-import { SHEET_LAYOUT } from '../constants/layout';
-import { clamp } from '../utils/clamp';
-import { getRouteForScreen } from '../utils/getRouteForScreen';
-import { isSheetScreen } from '../utils/isSheetScreen';
-import { mergeScreenOptions } from '../utils/mergeScreenOptions';
-import { renderScreenContent } from '../utils/renderScreenContent';
-import { resolveNavigatorOptions } from '../utils/resolveNavigatorOptions';
+import {
+  clamp,
+  isSheetScreen,
+  getRouteForScreen,
+  mergeScreenOptions,
+  renderScreenContent,
+  resolveNavigatorOptions,
+} from '../utils';
 import { SheetTabBar } from './SheetTabBar';
+import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
+import { SHEET_ANIMATION, SHEET_COLORS, SHEET_LAYOUT } from '../constants';
 
 export function FloatingSheetNavigator({
   children,
@@ -63,9 +63,9 @@ export function FloatingSheetNavigator({
 
   const activeOptions = activeScreen
     ? mergeScreenOptions(
-        resolveNavigatorOptions(screenOptions, activeRoute, true),
-        activeScreen.props.options
-      )
+      resolveNavigatorOptions(screenOptions, activeRoute, true),
+      activeScreen.props.options
+    )
     : {};
 
   const animateSheetToProgress = useCallback(
