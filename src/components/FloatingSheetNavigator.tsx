@@ -5,30 +5,19 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
-import {
-  Animated,
-  PanResponder,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import type {
-  SheetNavigatorProps,
-  SheetRenderHelpers,
-} from "../types";
-import { SHEET_ANIMATION } from "../constants/animation";
-import { SHEET_COLORS } from "../constants/colors";
-import { SHEET_LAYOUT } from "../constants/layout";
-import { clamp } from "../utils/clamp";
-import { getRouteForScreen } from "../utils/getRouteForScreen";
-import { getTabLabel } from "../utils/getTabLabel";
-import { getTintColor } from "../utils/getTintColor";
-import { isSheetScreen } from "../utils/isSheetScreen";
-import { mergeScreenOptions } from "../utils/mergeScreenOptions";
-import { renderScreenContent } from "../utils/renderScreenContent";
-import { resolveNavigatorOptions } from "../utils/resolveNavigatorOptions";
+} from 'react';
+import { Animated, PanResponder, StyleSheet, View } from 'react-native';
+import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
+import { SHEET_ANIMATION } from '../constants/animation';
+import { SHEET_COLORS } from '../constants/colors';
+import { SHEET_LAYOUT } from '../constants/layout';
+import { clamp } from '../utils/clamp';
+import { getRouteForScreen } from '../utils/getRouteForScreen';
+import { isSheetScreen } from '../utils/isSheetScreen';
+import { mergeScreenOptions } from '../utils/mergeScreenOptions';
+import { renderScreenContent } from '../utils/renderScreenContent';
+import { resolveNavigatorOptions } from '../utils/resolveNavigatorOptions';
+import { SheetTabBar } from './SheetTabBar';
 
 export function FloatingSheetNavigator({
   children,
@@ -43,19 +32,19 @@ export function FloatingSheetNavigator({
 }: SheetNavigatorProps) {
   const screens = useMemo(
     () => Children.toArray(children).filter(isSheetScreen),
-    [children],
+    [children]
   );
 
   const firstRouteName = screens[0]?.props.name;
 
   const [activeRouteName, setActiveRouteName] = useState(
-    initialRouteName ?? firstRouteName,
+    initialRouteName ?? firstRouteName
   );
 
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
 
   const expansionProgress = useRef(
-    new Animated.Value(initiallyExpanded ? 1 : 0),
+    new Animated.Value(initiallyExpanded ? 1 : 0)
   ).current;
 
   const progressValueRef = useRef(initiallyExpanded ? 1 : 0);
@@ -65,16 +54,17 @@ export function FloatingSheetNavigator({
   const dragRange = Math.max(expandedHeight - collapsedHeight, 1);
 
   const activeScreen =
-    screens.find(screen => screen.props.name === activeRouteName) ?? screens[0];
+    screens.find((screen) => screen.props.name === activeRouteName) ??
+    screens[0];
 
   const activeRoute = activeScreen
     ? getRouteForScreen(activeScreen)
-    : { name: "", title: "" };
+    : { name: '', title: '' };
 
   const activeOptions = activeScreen
     ? mergeScreenOptions(
         resolveNavigatorOptions(screenOptions, activeRoute, true),
-        activeScreen.props.options,
+        activeScreen.props.options
       )
     : {};
 
@@ -100,21 +90,21 @@ export function FloatingSheetNavigator({
         }
       });
     },
-    [expansionProgress],
+    [expansionProgress]
   );
 
   const openSheet = useCallback(
     (initialVelocity = 0) => {
       animateSheetToProgress(1, initialVelocity);
     },
-    [animateSheetToProgress],
+    [animateSheetToProgress]
   );
 
   const minimizeSheet = useCallback(
     (initialVelocity = 0) => {
       animateSheetToProgress(0, initialVelocity);
     },
-    [animateSheetToProgress],
+    [animateSheetToProgress]
   );
 
   const sheetPanResponder = useMemo(
@@ -133,7 +123,7 @@ export function FloatingSheetNavigator({
         },
 
         onPanResponderGrant: () => {
-          expansionProgress.stopAnimation(value => {
+          expansionProgress.stopAnimation((value) => {
             const safeValue = clamp(value, 0, 1);
 
             dragStartProgressRef.current = safeValue;
@@ -145,7 +135,7 @@ export function FloatingSheetNavigator({
           const nextProgress = clamp(
             dragStartProgressRef.current - gestureState.dy / dragRange,
             0,
-            1,
+            1
           );
 
           progressValueRef.current = nextProgress;
@@ -191,13 +181,7 @@ export function FloatingSheetNavigator({
           }
         },
       }),
-    [
-      dragRange,
-      expansionProgress,
-      isExpanded,
-      minimizeSheet,
-      openSheet,
-    ],
+    [dragRange, expansionProgress, isExpanded, minimizeSheet, openSheet]
   );
 
   useEffect(() => {
@@ -237,11 +221,11 @@ export function FloatingSheetNavigator({
       setActiveRouteName(routeName);
       openSheet();
     },
-    [openSheet],
+    [openSheet]
   );
 
   const helpers: SheetRenderHelpers = {
-    currentRouteName: activeScreen?.props.name ?? "",
+    currentRouteName: activeScreen?.props.name ?? '',
     goTo,
     isExpanded,
     minimize: minimizeSheet,
@@ -277,11 +261,7 @@ export function FloatingSheetNavigator({
     <View pointerEvents="box-none" style={[styles.container, style]}>
       <Animated.View
         {...sheetPanResponder.panHandlers}
-        style={[
-          styles.sheet,
-          { height: sheetHeight },
-          sheetStyle,
-        ]}
+        style={[styles.sheet, { height: sheetHeight }, sheetStyle]}
       >
         <View
           style={[
@@ -292,7 +272,7 @@ export function FloatingSheetNavigator({
           ]}
         >
           <Animated.View
-            pointerEvents={isExpanded ? "auto" : "none"}
+            pointerEvents={isExpanded ? 'auto' : 'none'}
             style={[
               styles.contentWrap,
               activeOptions.contentStyle,
@@ -332,90 +312,15 @@ export function FloatingSheetNavigator({
             </Animated.View>
           </Animated.View>
 
-          <View
-            style={[
-              styles.tabBar,
-              activeOptions.tabBarBackgroundColor
-                ? { backgroundColor: activeOptions.tabBarBackgroundColor }
-                : null,
-              activeOptions.tabBarStyle,
-              { height: collapsedHeight },
-            ]}
-          >
-            {screens.map(screen => {
-              const isActive = screen.props.name === activeScreen.props.name;
-              const route = getRouteForScreen(screen);
-
-              const resolvedOptions = mergeScreenOptions(
-                resolveNavigatorOptions(screenOptions, route, isActive),
-                screen.props.options,
-              );
-
-              const tintColor = getTintColor(resolvedOptions, isActive);
-              const tabLabel = getTabLabel(screen, resolvedOptions);
-              const shouldShowDot = resolvedOptions.showTabDot ?? true;
-
-              const shouldHideTabLabel =
-                resolvedOptions.hideTitle || resolvedOptions.hideTabLabel;
-
-              const icon = resolvedOptions.renderIcon
-                ? resolvedOptions.renderIcon({
-                    color: tintColor,
-                    focused: isActive,
-                    route,
-                    size: 22,
-                  })
-                : resolvedOptions.icon;
-
-              return (
-                <Pressable
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: isActive }}
-                  key={screen.props.name}
-                  onPress={() => goTo(screen.props.name)}
-                  style={[
-                    styles.tab,
-                    resolvedOptions.tabStyle,
-                    isActive ? styles.activeTab : null,
-                    isActive ? resolvedOptions.activeTabStyle : null,
-                  ]}
-                >
-                  {icon ? (
-                    icon
-                  ) : shouldShowDot ? (
-                    <View
-                      style={[
-                        styles.tabDot,
-                        { backgroundColor: tintColor },
-                        resolvedOptions.dotStyle,
-                        isActive ? styles.activeTabDot : null,
-                        isActive ? resolvedOptions.activeDotStyle : null,
-                      ]}
-                    />
-                  ) : null}
-
-                  {shouldHideTabLabel ? null : (
-                    <Text
-                      numberOfLines={1}
-                      style={[
-                        styles.tabText,
-                        {
-                          color: isActive
-                            ? SHEET_COLORS.activeText
-                            : tintColor,
-                        },
-                        resolvedOptions.tabLabelStyle,
-                        isActive ? styles.activeTabText : null,
-                        isActive ? resolvedOptions.activeTabLabelStyle : null,
-                      ]}
-                    >
-                      {tabLabel}
-                    </Text>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
+          <SheetTabBar
+            screens={screens}
+            activeRouteName={activeScreen.props.name}
+            collapsedHeight={collapsedHeight}
+            screenOptions={screenOptions}
+            tabBarBackgroundColor={activeOptions.tabBarBackgroundColor}
+            tabBarStyle={activeOptions.tabBarStyle}
+            onTabPress={goTo}
+          />
         </View>
       </Animated.View>
     </View>
@@ -424,14 +329,14 @@ export function FloatingSheetNavigator({
 
 const styles = StyleSheet.create({
   container: {
-    bottom: "5%",
-    left: "5%",
-    position: "absolute",
-    right: "5%",
-    justifyContent: "flex-end",
+    bottom: '5%',
+    left: '5%',
+    position: 'absolute',
+    right: '5%',
+    justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderRadius: SHEET_LAYOUT.borderRadius,
   },
   surface: {
@@ -440,21 +345,21 @@ const styles = StyleSheet.create({
     borderColor: SHEET_COLORS.border,
     borderWidth: 1,
     flex: 1,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   contentWrap: {
     left: 0,
     paddingHorizontal: 16,
     paddingTop: 12,
-    position: "absolute",
+    position: 'absolute',
     right: 0,
     top: 0,
   },
   handleArea: {
-    alignSelf: "center",
-    alignItems: "center",
+    alignSelf: 'center',
+    alignItems: 'center',
     height: SHEET_LAYOUT.handleAreaHeight,
-    justifyContent: "center",
+    justifyContent: 'center',
     marginBottom: 6,
     width: SHEET_LAYOUT.handleAreaWidth,
   },
@@ -465,54 +370,8 @@ const styles = StyleSheet.create({
     opacity: 0.55,
     width: SHEET_LAYOUT.handleWidth,
   },
-  tabBar: {
-    alignItems: "center",
-    backgroundColor: SHEET_COLORS.tabBarBackground,
-    borderColor: SHEET_COLORS.tabBarBorder,
-    bottom: 0,
-    flexDirection: "row",
-    gap: 6,
-    left: 0,
-    paddingHorizontal: 10,
-    position: "absolute",
-    right: 0,
-    zIndex: 2,
-  },
-  tab: {
-    alignItems: "center",
-    borderRadius: 24,
-    flex: 1,
-    gap: 6,
-    justifyContent: "center",
-    minHeight: SHEET_LAYOUT.tabMinHeight,
-    paddingHorizontal: 8,
-  },
-  activeTab: {
-    backgroundColor: SHEET_COLORS.activeTabBackground,
-  },
-  tabDot: {
-    backgroundColor: SHEET_COLORS.handle,
-    borderRadius: 999,
-    height: 6,
-    opacity: 0.42,
-    width: 6,
-  },
-  activeTabDot: {
-    backgroundColor: SHEET_COLORS.activeText,
-    opacity: 1,
-    width: 22,
-  },
-  tabText: {
-    color: SHEET_COLORS.inactiveTint,
-    fontSize: 12,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-  activeTabText: {
-    color: SHEET_COLORS.activeText,
-  },
   screen: {
     flex: 1,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 });
