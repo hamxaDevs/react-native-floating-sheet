@@ -1,4 +1,4 @@
-import { Animated, PanResponder, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import {
   Children,
   useCallback,
@@ -18,6 +18,7 @@ import {
   warnSheetScreenValidation,
 } from '../utils';
 import { SheetTabBar } from './SheetTabBar';
+import { useSheetAnimation, useSheetPanResponder } from '../hooks';
 import type { SheetNavigatorProps, SheetRenderHelpers } from '../types';
 import { SHEET_ANIMATION, SHEET_COLORS, SHEET_LAYOUT } from '../constants';
 
@@ -48,17 +49,30 @@ export function FloatingSheetNavigator({
     initialRouteName ?? firstRouteName
   );
 
-  const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
+  const {
+    isExpanded,
+    expansionProgress,
+    progressValueRef,
+    dragStartProgressRef,
+    openSheet,
+    collapseSheet,
+  } = useSheetAnimation({
+    initiallyExpanded,
+  });
 
-  const expansionProgress = useRef(
-    new Animated.Value(initiallyExpanded ? 1 : 0)
-  ).current;
-
-  const progressValueRef = useRef(initiallyExpanded ? 1 : 0);
-  const dragStartProgressRef = useRef(initiallyExpanded ? 1 : 0);
   const screenProgress = useRef(new Animated.Value(1)).current;
 
   const dragRange = Math.max(expandedHeight - collapsedHeight, 1);
+
+  const sheetPanResponder = useSheetPanResponder({
+    collapseSheet,
+    dragRange,
+    dragStartProgressRef,
+    expansionProgress,
+    isExpanded,
+    openSheet,
+    progressValueRef,
+  });
 
   const activeScreen =
     screens.find((screen) => screen.props.name === activeRouteName) ??
@@ -82,122 +96,6 @@ export function FloatingSheetNavigator({
     });
   }, [screens, initialRouteName]);
 
-  const animateSheetToProgress = useCallback(
-    (toProgress: number, initialVelocity = 0) => {
-      const nextProgress = clamp(toProgress, 0, 1);
-
-      if (nextProgress > 0) {
-        setIsExpanded(true);
-      }
-
-      Animated.spring(expansionProgress, {
-        toValue: nextProgress,
-        damping: SHEET_ANIMATION.spring.damping,
-        mass: SHEET_ANIMATION.spring.mass,
-        stiffness: SHEET_ANIMATION.spring.stiffness,
-        velocity: initialVelocity,
-        useNativeDriver: false,
-      }).start(({ finished }) => {
-        if (finished) {
-          progressValueRef.current = nextProgress;
-          setIsExpanded(nextProgress > 0);
-        }
-      });
-    },
-    [expansionProgress]
-  );
-
-  const openSheet = useCallback(
-    (initialVelocity = 0) => {
-      animateSheetToProgress(1, initialVelocity);
-    },
-    [animateSheetToProgress]
-  );
-
-  const collapseSheet = useCallback(
-    (initialVelocity = 0) => {
-      animateSheetToProgress(0, initialVelocity);
-    },
-    [animateSheetToProgress]
-  );
-
-  const sheetPanResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_event, gestureState) => {
-          const isVerticalDrag =
-            Math.abs(gestureState.dy) > 8 &&
-            Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
-
-          if (!isVerticalDrag) {
-            return false;
-          }
-
-          return isExpanded ? gestureState.dy > 0 : gestureState.dy < 0;
-        },
-
-        onPanResponderGrant: () => {
-          expansionProgress.stopAnimation((value) => {
-            const safeValue = clamp(value, 0, 1);
-
-            dragStartProgressRef.current = safeValue;
-            progressValueRef.current = safeValue;
-          });
-        },
-
-        onPanResponderMove: (_event, gestureState) => {
-          const nextProgress = clamp(
-            dragStartProgressRef.current - gestureState.dy / dragRange,
-            0,
-            1
-          );
-
-          progressValueRef.current = nextProgress;
-          expansionProgress.setValue(nextProgress);
-        },
-
-        onPanResponderRelease: (_event, gestureState) => {
-          const currentProgress = progressValueRef.current;
-          const startedExpanded = dragStartProgressRef.current > 0.5;
-
-          if (gestureState.vy < -SHEET_ANIMATION.velocityThreshold) {
-            openSheet(Math.abs(gestureState.vy));
-            return;
-          }
-
-          if (gestureState.vy > SHEET_ANIMATION.velocityThreshold) {
-            collapseSheet(Math.abs(gestureState.vy));
-            return;
-          }
-
-          if (startedExpanded) {
-            if (currentProgress > SHEET_ANIMATION.keepExpandedThreshold) {
-              openSheet();
-            } else {
-              collapseSheet();
-            }
-
-            return;
-          }
-
-          if (currentProgress > SHEET_ANIMATION.expandThresholdFromCollapsed) {
-            openSheet();
-          } else {
-            collapseSheet();
-          }
-        },
-
-        onPanResponderTerminate: () => {
-          if (progressValueRef.current > 0.5) {
-            openSheet();
-          } else {
-            collapseSheet();
-          }
-        },
-      }),
-    [collapseSheet, dragRange, expansionProgress, isExpanded, openSheet]
-  );
-
   useEffect(() => {
     if (!activeScreen && firstRouteName) {
       setActiveRouteName(firstRouteName);
@@ -212,7 +110,7 @@ export function FloatingSheetNavigator({
     return () => {
       expansionProgress.removeListener(listenerId);
     };
-  }, [expansionProgress]);
+  }, [expansionProgress, progressValueRef]);
 
   useEffect(() => {
     if (!activeRouteName) {
