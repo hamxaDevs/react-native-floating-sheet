@@ -1,5 +1,5 @@
-import type { ComponentType, ReactNode } from "react";
-import type { TextStyle, ViewStyle } from "react-native";
+import type { ComponentType, ReactNode } from 'react';
+import type { TextStyle, ViewStyle } from 'react-native';
 
 export type SheetRoute = {
   name: string;
@@ -13,9 +13,7 @@ export type SheetIconProps = {
   size: number;
 };
 
-export type SheetIconRenderer = (
-  props: SheetIconProps,
-) => ReactNode;
+export type SheetIconRenderer = (props: SheetIconProps) => ReactNode;
 
 export type SheetRenderHelpers = {
   currentRouteName: string;
