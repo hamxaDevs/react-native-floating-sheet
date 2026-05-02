@@ -1,9 +1,6 @@
 import { StyleSheet, View } from 'react-native';
+import type { SheetHandleProps } from '../types';
 import { SHEET_COLORS, SHEET_LAYOUT } from '../constants';
-
-type SheetHandleProps = {
-    color?: string;
-};
 
 export function SheetHandle({ color }: SheetHandleProps) {
     return (
