@@ -1,4 +1,4 @@
-import type { SheetScreenProps } from '../types/sheet.types';
+import type { SheetScreenProps } from '../types';
 
 export function FloatingSheetScreen(_props: SheetScreenProps) {
   return null;

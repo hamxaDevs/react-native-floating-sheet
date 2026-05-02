@@ -1,5 +1,5 @@
-import { FloatingSheetNavigator } from './components/FloatingSheetNavigator';
 import { FloatingSheetScreen } from './components/FloatingSheetScreen';
+import { FloatingSheetNavigator } from './components/FloatingSheetNavigator';
 export type {
   SheetNavigatorProps,
   SheetScreenElement,

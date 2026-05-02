@@ -1,5 +1,5 @@
+import { SHEET_COLORS } from '../constants';
 import type { SheetScreenOptions } from '../types';
-import { SHEET_COLORS } from '../constants/colors';
 
 export function getTintColor(options: SheetScreenOptions, focused: boolean) {
   return focused
