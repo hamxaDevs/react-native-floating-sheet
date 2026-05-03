@@ -101,3 +101,4 @@ jobs:
 
           echo "Release branch is ready for v$VERSION."
           echo "Open a PR from branch ${GITHUB_REF_NAME} into main."
+
