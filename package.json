@@ -1,20 +1,22 @@
 {
   "name": "react-native-floating-sheet",
   "version": "0.1.0",
-  "description": "A floating bottom-sheet navigation component with expandable tab screens for React Native.",
+  "description": "A floating bottom-sheet navigator for React Native with expandable tab screens.",
   "main": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
+  "module": "./lib/module/index.js",
+  "types": "./lib/typescript/module/src/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
-      "types": "./lib/typescript/src/index.d.ts",
+      "types": "./lib/typescript/module/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
-    "src",
     "lib",
+    "README.md",
+    "LICENSE",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -31,8 +33,12 @@
   },
   "keywords": [
     "react-native",
-    "ios",
-    "android"
+    "bottom-sheet",
+    "floating-sheet",
+    "tabs",
+    "navigator",
+    "navigation",
+    "mobile"
   ],
   "repository": {
     "type": "git",
@@ -85,6 +91,7 @@
     "source": "src",
     "output": "lib",
     "targets": [
+      "commonjs",
       [
         "module",
         {
