@@ -1,0 +1,103 @@
+name: Release Branch
+
+on:
+  push:
+    branches:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-branch-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-release-branch:
+    name: Prepare release branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ github.token }}
+
+      - name: Validate release branch name
+        id: version
+        run: |
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+
+          if ! echo "$BRANCH_NAME" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "Invalid release branch name: $BRANCH_NAME"
+            echo "Use a semver release branch like v0.1.1 or v1.0.0-beta.1"
+            exit 1
+          fi
+
+          VERSION="${BRANCH_NAME#v}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+
+      - name: Check npm version does not already exist
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          if npm view "react-native-floating-sheet@$VERSION" version >/dev/null 2>&1; then
+            echo "react-native-floating-sheet@$VERSION already exists on npm."
+            exit 1
+          fi
+
+      - name: Update package.json version
+        id: bump
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          CURRENT_VERSION="$(node -p "require('./package.json').version")"
+
+          echo "Current package version: $CURRENT_VERSION"
+          echo "Target release version: $VERSION"
+
+          if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+            echo "package.json already has the correct version."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          node - <<'NODE'
+          const fs = require('fs');
+
+          const version = process.env.VERSION;
+          const packagePath = 'package.json';
+          const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+
+          pkg.version = version;
+
+          fs.writeFileSync(
+            packagePath,
+            `${JSON.stringify(pkg, null, 2)}\n`
+          );
+          NODE
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Commit version bump
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add package.json
+          git commit -m "chore: release v$VERSION"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Release branch summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          echo "Release branch is ready for v$VERSION."
+          echo "Open a PR from branch ${GITHUB_REF_NAME} into main."
