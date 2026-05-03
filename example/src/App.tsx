@@ -10,6 +10,7 @@ import { Sheet } from 'react-native-floating-sheet'
 import { ExploreIcon, SavedIcon, ProfileIcon } from './assets'
 import { ExploreScreen, SavedScreen, ProfileScreen } from './screens'
 
+
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
