@@ -10,6 +10,7 @@ It is designed for lightweight, tab-based bottom sheet experiences without requi
 
 ## Contents
 
+- [Demo](#demo)
 - [Features](#features)
 - [Installation](#installation)
 - [Prerequisites](#prerequisites)
@@ -28,6 +29,47 @@ It is designed for lightweight, tab-based bottom sheet experiences without requi
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+
+---
+
+## Demo
+
+See `react-native-floating-sheet` running on both iOS and Android.
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>iOS</strong>
+    </td>
+    <td align="center">
+      <strong>Android</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <video
+        src="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/ios_demo.mp4"
+        width="260"
+        controls
+      />
+      <br />
+      <a href="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/ios_demo.mp4">
+        View iOS demo
+      </a>
+    </td>
+    <td align="center">
+      <video
+        src="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/android_demo.mp4"
+        width="260"
+        controls
+      />
+      <br />
+      <a href="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/android_demo.mp4">
+        View Android demo
+      </a>
+    </td>
+  </tr>
+</table>
 
 ---
 
