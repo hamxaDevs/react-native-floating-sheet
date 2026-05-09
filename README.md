@@ -48,23 +48,23 @@ See `react-native-floating-sheet` running on both iOS and Android.
   <tr>
     <td align="center">
       <video
-        src="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/ios_demo.mp4"
+        src="https://github.com/hamxaDevs/react-native-floating-sheet/blob/dev/assets/ios_demo.gif"
         width="260"
         controls
       />
       <br />
-      <a href="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/ios_demo.mp4">
+      <a href="https://github.com/hamxaDevs/react-native-floating-sheet/blob/dev/assets/ios_demo.gif">
         View iOS demo
       </a>
     </td>
     <td align="center">
       <video
-        src="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/android_demo.mp4"
+        src="https://github.com/hamxaDevs/react-native-floating-sheet/blob/dev/assets/android_demo.gif"
         width="260"
         controls
       />
       <br />
-      <a href="https://raw.githubusercontent.com/hamxaDevs/react-native-floating-sheet/main/assets/android_demo.mp4">
+      <a href="https://github.com/hamxaDevs/react-native-floating-sheet/blob/dev/assets/android_demo.gif">
         View Android demo
       </a>
     </td>
