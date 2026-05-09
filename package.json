@@ -1,6 +1,6 @@
 {
   "name": "react-native-floating-sheet",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A floating bottom-sheet navigator for React Native with expandable tab screens.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
